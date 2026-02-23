@@ -71,26 +71,28 @@ bash pack.sh
 
 ### 3) SFT Training
 
-Convert HF checkpoint to Megatron checkpoint (one-time):
+Convert HF checkpoint to Megatron checkpoint (one-time, for continued training):
 
 ```bash
 cd examples/post_training/modelopt
 
-# here we use base model.
+# OpenResearcher/OpenResearcher-30B-A3B is already SFT-trained
+# from nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-Base-BF16.
+# Use it as the initialization checkpoint for further training.
 TP=1 EP=1 ETP=1 PP=1 CP=1 DP=1 \
-HF_MODEL_CKPT=nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-Base-BF16 \
-MLM_MODEL_SAVE=../../../checkpoints/nemotron30b_base_mlm \
+HF_MODEL_CKPT=OpenResearcher/OpenResearcher-30B-A3B \
+MLM_MODEL_SAVE=../../../checkpoints/openresearcher_30a3b_init_mlm \
 MLM_SKIP_INSTALL=1 \
 MLM_EXTRA_ARGS="--no-gradient-accumulation-fusion" \
-./convert.sh nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-Base-BF16
+./convert.sh OpenResearcher/OpenResearcher-30B-A3B
 ```
 
 Run SFT:
 
 ```bash
 TP=2 EP=1 ETP=1 PP=1 CP=2 DP=1 \
-MLM_MODEL_CKPT=checkpoints/nemotron30b_base_mlm \
-MLM_MODEL_SAVE=checkpoints/openresearcher_30a3b \
+MLM_MODEL_CKPT=checkpoints/openresearcher_30a3b_init_mlm \
+MLM_MODEL_SAVE=checkpoints/openresearcher_30a3b_continue \
 BLEND_PATH=examples/openresearcher/data/search_blend_path.json \
 MAX_SEQ=262144 \
 GBS=60 \
@@ -108,20 +110,20 @@ bash examples/openresearcher/train_search_correct_only_base.sh
 cd examples/openresearcher
 
 TP=1 PP=1 EP=1 ETP=1 CP=1 DP=1 \
-MLM_MODEL_CKPT=checkpoints/nemotron9b_sft \
-HF_MODEL_CKPT=nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16 \
-EXPORT_DIR=checkpoints/nemotron9b_sft_hf \
+MLM_MODEL_CKPT=checkpoints/openresearcher_30a3b_continue \
+HF_MODEL_CKPT=OpenResearcher/OpenResearcher-30B-A3B \
+EXPORT_DIR=checkpoints/openresearcher_30a3b_continue_hf \
 MLM_SKIP_INSTALL=1 \
-bash convert_to_hf.sh nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16
+bash convert_to_hf.sh OpenResearcher/OpenResearcher-30B-A3B
 ```
 
 ## Outputs
 
 - Materialized data: `data/converted_gpt_oss_search_correct.materialized.jsonl`
 - Packed data: `data/converted_gpt_oss_search_correct.packed_262144.jsonl`
-- Base Megatron checkpoint: `checkpoints/nemotron30b_base_mlm`
-- SFT checkpoint: `checkpoints/openresearcher_30a3b`
-- HF export: `checkpoints/nemotron9b_sft_hf`
+- Continued-training init Megatron checkpoint: `checkpoints/openresearcher_30a3b_init_mlm`
+- Continued-training output checkpoint: `checkpoints/openresearcher_30a3b_continue`
+- HF export: `checkpoints/openresearcher_30a3b_continue_hf`
 
 ## Notes
 
