@@ -56,6 +56,8 @@ bash pack.sh
 
 ### 3) HF → Megatron（一次性）
 
+使用 **`convert_compat.sh`**（不导出 TE mcore，ckpt 更兼容，避免训练 load 时 `_extra_state` 缺失）：
+
 ```bash
 cd examples/post_training/modelopt
 
@@ -64,7 +66,7 @@ HF_MODEL_CKPT=Qwen/Qwen3-0.6B \
 MLM_MODEL_SAVE=../../../checkpoints/qwen3_0.6b_init_mlm \
 MLM_SKIP_INSTALL=1 \
 MLM_EXTRA_ARGS="--no-gradient-accumulation-fusion" \
-./convert.sh Qwen/Qwen3-0.6B
+./convert_compat.sh Qwen/Qwen3-0.6B
 ```
 
 ### 4) SFT 训练（50 条示例数据，快速跑通）
@@ -129,7 +131,7 @@ bash pack.sh
 
 ### 3) HF → Megatron
 
-与上面相同（若已做过可跳过）：
+与上面相同，使用 **`convert_compat.sh`**（若已做过可跳过）：
 
 ```bash
 cd examples/post_training/modelopt
@@ -138,7 +140,7 @@ HF_MODEL_CKPT=Qwen/Qwen3-0.6B \
 MLM_MODEL_SAVE=../../../checkpoints/qwen3_0.6b_init_mlm \
 MLM_SKIP_INSTALL=1 \
 MLM_EXTRA_ARGS="--no-gradient-accumulation-fusion" \
-./convert.sh Qwen/Qwen3-0.6B
+./convert_compat.sh Qwen/Qwen3-0.6B
 ```
 
 ### 4) SFT 训练（完整数据）
