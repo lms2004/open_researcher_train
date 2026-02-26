@@ -5,11 +5,27 @@ THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${THIS_DIR}/../.." && pwd)"
 MODEL_OPT_DIR="${ROOT_DIR}/examples/post_training/modelopt"
 
+# Guard: arguments.sh and model confs use [ -z ${VAR} ] without :- ; with nounset they fail if VAR is unset
+: "${SANDBOX_ENV_SETUP:=}"
+: "${MLM_ENV_SETUP:=}"
+: "${MLM_EXTRA_ARGS:=}"
+: "${MLM_RESUME_ARGS:=}"
+: "${SANDBOX_ROOT:=}"
+: "${HF_TOKEN:=}"
+: "${HF_MODEL_CKPT:=}"
+: "${LAUNCH_SCRIPT:=torchrun --nproc_per_node=1}"
+: "${MLM_WORK_DIR:=/tmp/megatron_workspace}"
+: "${MLM_SKIP_INSTALL:=}"
+: "${TP:=1}"
+: "${ETP:=${TP}}"
+: "${EP:=1}"
+: "${PP:=1}"
+: "${CP:=1}"
+: "${DP:=1}"
+
 # Required env
 : "${MLM_MODEL_CKPT:?ERROR: set MLM_MODEL_CKPT to a Megatron checkpoint dir}"
 : "${MLM_MODEL_SAVE:=checkpoints/minimal_run}"
-: "${LAUNCH_SCRIPT:=torchrun --nproc_per_node=1}"
-: "${TP:=1}"
 
 # Optional env / defaults
 : "${DATA_PACKED_JSONL:=${THIS_DIR}/data/converted_gpt_oss_search_correct.packed_262144.jsonl}"
@@ -28,6 +44,12 @@ MLM_MODEL_CFG="${1:-Qwen/Qwen3-0.6B}"
 # Load model args from modelopt (gives MODEL_ARGS, TOKENIZER_MODEL, etc.)
 SCRIPT_DIR="${MODEL_OPT_DIR}"
 source "${MODEL_OPT_DIR}/conf/arguments.sh" "${MLM_MODEL_CFG}"
+
+if [[ ! -f "${DATA_PACKED_JSONL}" ]]; then
+  echo "ERROR: DATA_PACKED_JSONL not found: ${DATA_PACKED_JSONL}"
+  echo "Run materialize.sh and pack.sh first, or set DATA_PACKED_JSONL to an existing packed jsonl."
+  exit 1
+fi
 
 # (Very important) drop qk-layernorm if ckpt doesn't have q_layernorm extra_state
 # This directly targets your missing key: decoder.layers.self_attention.q_layernorm._extra_state/...
