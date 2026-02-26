@@ -13,7 +13,7 @@ MODEL_OPT_DIR="${ROOT_DIR}/examples/post_training/modelopt"
 : "${SANDBOX_ROOT:=}"
 : "${HF_TOKEN:=}"
 : "${HF_MODEL_CKPT:=}"
-: "${LAUNCH_SCRIPT:=torchrun --nproc_per_node=1}"
+: "${LAUNCH_SCRIPT:=}"
 : "${MLM_WORK_DIR:=/tmp/megatron_workspace}"
 : "${MLM_SKIP_INSTALL:=}"
 : "${TP:=1}"
@@ -85,6 +85,7 @@ ${LAUNCH_SCRIPT} "${PRETRAIN_EXE}" \
   --adam-beta1 0.9 \
   --adam-beta2 0.98 \
   --bf16 \
+  --no-gradient-accumulation-fusion \
   --log-interval 1 \
   --save-interval 50 \
   --eval-iters 1 \

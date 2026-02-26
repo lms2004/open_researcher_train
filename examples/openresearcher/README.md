@@ -34,6 +34,7 @@ pip install mamba-ssm
 - `examples/openresearcher/train_search_correct_only_base.sh`
 - `examples/openresearcher/convert_to_hf.sh`
 - `examples/openresearcher/README.md`
+- `examples/openresearcher/README_QWEN.md` — 单卡 A100 + Qwen3-0.6B（含 50 条示例跑通命令）
 
 ## Quick Start
 
